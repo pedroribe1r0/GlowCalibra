@@ -8,13 +8,11 @@ class Image
 {
 private:
     cv::Mat matrix;
-    TupleI resolution;
 
 public:
     Image();
     ~Image();
     void loadImage(std::string path);
-    void printImage();
     void saveImage();
     void grayImage();
 };
@@ -34,4 +32,27 @@ void Image::loadImage(std::string path)
 void Image::saveImage()
 {
     cv::imwrite("saida.jpg", matrix);
+}
+void Image::grayImage()
+{
+    int i, j, cols, rows;
+    cols = matrix.cols;
+    rows = matrix.rows;
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < cols; j++)
+        {
+            cv::Vec3b pixel = matrix.at<cv::Vec3b>(i, j);
+            int red = pixel[2];
+            int green = pixel[1];
+            int blue = pixel[0];
+
+            int sum = (blue + green + blue) / 3;
+            sum = sum > 150 ? 255 : 0;
+            pixel[2] = sum;                     // assign sum to red channel
+            pixel[1] = sum;                     // assign sum to green channel
+            pixel[0] = sum;                     // assign sum to blue channel
+            matrix.at<cv::Vec3b>(i, j) = pixel; // update the pixel in the matrix
+        }
+    }
 }
