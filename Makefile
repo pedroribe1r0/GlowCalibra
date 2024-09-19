@@ -1,6 +1,6 @@
 # Definições de variáveis
 CXX = g++
-CXXFLAGS = -std=c++11 -g -I/usr/include/opencv4  # Caminho para os cabeçalhos do OpenCV
+CXXFLAGS = -std=c++17 -g -I/usr/include/opencv4  # Caminho para os cabeçalhos do OpenCV
 LDFLAGS = -L/usr/lib `pkg-config --libs opencv4`  # Caminho para as bibliotecas do OpenCV
 SRC_DIR = src
 BIN_DIR = bin
