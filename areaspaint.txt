@@ -1,0 +1,11 @@
+Área da gota 1: 99.5 pixels
+Área da gota 2: 27 pixels
+Área da gota 3: 255 pixels
+Área da gota 4: 406.5 pixels
+Área da gota 5: 268.5 pixels
+Área da gota 6: 84 pixels
+Área da gota 7: 71.5 pixels
+Área da gota 8: 12925 pixels
+Área da gota 9: 3746 pixels
+Área da gota 10: 17019 pixels
+Área da gota 11: 2110 pixels
