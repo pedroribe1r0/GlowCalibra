@@ -6,8 +6,9 @@ int main()
 {
     Image imagem;
 
-    std::string path = "Database/SourceData/WhatsApp Image 2024-09-04 at 16.13.35.jpeg";
+    std::string path = "Database/SourceData/IMG_3536.jpg";
     imagem.loadImage(path);
+    imagem.cutSquareInMiddle();
 
     imagem.grayImage();
     imagem.saveImage();

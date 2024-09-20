@@ -22,6 +22,7 @@ public:
     void getArea();
     void equalizeImage();
     void polarizeImage();
+    void cutSquareInMiddle();
 };
 int Image::counter = 0;
 
@@ -67,7 +68,7 @@ void Image::grayImage()
 
 void Image::polarizeImage()
 {
-    cv::adaptiveThreshold(matrix, matrix, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, -30);
+    cv::adaptiveThreshold(matrix, matrix, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, -4);
 }
 void Image::getArea()
 {
@@ -103,7 +104,7 @@ void Image::getArea()
         double area = cv::contourArea(contours[i]);
 
         // Check if the area is greater than 1 pixel
-        if (area > 1)
+        if (area > 10)
         {
             // Write the area to the output file
             outputFile << "Área da gota " << i + 1 << ": " << area << " pixels" << std::endl;
@@ -122,4 +123,17 @@ void Image::equalizeImage()
     }
 
     cv::equalizeHist(matrix, matrix);
+}
+
+void Image::cutSquareInMiddle()
+{
+    int cols = matrix.cols;
+    int rows = matrix.rows;
+
+    int x = (cols) / 2;
+    int y = (rows) / 2;
+    int width = 400;  // Largura do retângulo
+    int height = 400; // Altura do retângulo
+    cv::Rect roi(x, y, width, height);
+    matrix = matrix(roi);
 }
