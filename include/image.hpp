@@ -9,6 +9,9 @@ class Image
 {
 private:
     cv::Mat matrix;
+    static int counter;
+    bool polarized;
+    bool equalized;
 
 public:
     Image();
@@ -17,7 +20,10 @@ public:
     void saveImage();
     void grayImage();
     void getArea();
+    void equalizeImage();
+    void polarizeImage();
 };
+int Image::counter = 0;
 
 Image::Image(/* args */)
 {
@@ -34,7 +40,9 @@ void Image::loadImage(std::string path)
 
 void Image::saveImage()
 {
-    cv::imwrite("teste11", matrix);
+    counter++;
+    std::string path = "Database/RefinedData/refinedImage" + std::to_string(counter) + ".jpeg";
+    cv::imwrite(path, matrix);
 }
 
 void Image::grayImage()
@@ -51,12 +59,15 @@ void Image::grayImage()
             int blue = pixel[0];
 
             int gray = (red + green + blue) / 3;
-            gray = gray > 150 ? 255 : 0;
-
             matrix.at<cv::Vec3b>(i, j) = cv::Vec3b(gray, gray, gray);
         }
     }
     cv::cvtColor(matrix, matrix, cv::COLOR_BGR2GRAY);
+}
+
+void Image::polarizeImage()
+{
+    cv::adaptiveThreshold(matrix, matrix, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, -30);
 }
 void Image::getArea()
 {
@@ -74,8 +85,6 @@ void Image::getArea()
     for (size_t i = 0; i < contours.size(); i++)
     {
         double area = cv::contourArea(contours[i]);
-        std::cout << "Área da gota " << i + 1 << ": " << area << " pixels" << std::endl;
-
         // Desenhar os contornos em vermelho (com espessura maior para visualização melhor)
         cv::drawContours(colorImage, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), 3); // Aumentar espessura para 3
     }
@@ -103,4 +112,14 @@ void Image::getArea()
 
     // Close the output file
     outputFile.close();
+}
+
+void Image::equalizeImage()
+{
+    if (matrix.channels() == 3)
+    {
+        cv::cvtColor(matrix, matrix, cv::COLOR_BGR2GRAY);
+    }
+
+    cv::equalizeHist(matrix, matrix);
 }
