@@ -25,7 +25,7 @@ public:
     void cutSquareInMiddle();
     void gaussianBlur();
     void threshould();
-
+    void cleanNonCircularThings();
     void circulize();
 };
 int Image::counter = 0;
@@ -103,53 +103,33 @@ void Image::polarizeImage()
 
 void Image::threshould()
 {
-    cv::threshold(matrix, matrix, 45, 255, cv::THRESH_TOZERO);
+    cv::threshold(matrix, matrix, 30, 255, cv::THRESH_TOZERO);
 }
 void Image::getArea()
 {
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
+    // Encontrar contornos
+    std::vector<std::vector<cv::Point>> contornos;
+    cv::findContours(matrix, contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    // Encontrar contornos na imagem binária
-    cv::findContours(matrix, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    // Criar uma máscara para manter apenas os contornos maiores
+    cv::Mat img_filt = cv::Mat::zeros(matrix.size(), CV_8UC1);
 
-    // Converter a imagem para colorida para desenhar contornos
-    cv::Mat colorImage;
-    cv::cvtColor(matrix, colorImage, cv::COLOR_GRAY2BGR);
+    // Definir a área mínima para manter os contornos
+    double area_minima = 10.0; // Defina o valor mínimo de área para eliminar bolhas pequenas
 
-    // Iterar sobre os contornos detectados
-    for (size_t i = 0; i < contours.size(); i++)
+    // Percorrer todos os contornos encontrados
+    for (size_t i = 0; i < contornos.size(); i++)
     {
-        double area = cv::contourArea(contours[i]);
-        // Desenhar os contornos em vermelho (com espessura maior para visualização melhor)
-        cv::drawContours(colorImage, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), 3); // Aumentar espessura para 3
-    }
+        double area = cv::contourArea(contornos[i]);
 
-    // Exibir a imagem com contornos
-    cv::imshow("Contornos Vermelhos", colorImage);
-    // Salvar a imagem com contornos
-    cv::imwrite("saida_com_contornos.jpg", colorImage);
-
-    std::ofstream outputFile("areaspaint.txt");
-
-    // Iterate over the contours
-    for (size_t i = 0; i < contours.size(); i++)
-    {
-        // Calculate the area of the contour
-        double area = cv::contourArea(contours[i]);
-
-        // Check if the area is greater than 1 pixel
-        if (area > 10)
+        // Manter apenas os contornos cuja área seja maior que o mínimo
+        if (area > area_minima)
         {
-            // Write the area to the output file
-            outputFile << "Área da gota " << i + 1 << ": " << area << " pixels" << std::endl;
+            cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
         }
     }
-
-    // Close the output file
-    outputFile.close();
+    matrix = img_filt;
 }
-
 void Image::equalizeImage()
 {
     cv::Mat aux;
@@ -190,4 +170,35 @@ void Image::gaussianBlur()
     cv::Mat aux;
     cv::convertScaleAbs(matrix, aux, 5.0, 0); // Aumentar contraste
     matrix = aux;
+}
+
+void Image::cleanNonCircularThings()
+{
+    // Encontrar contornos
+    std::vector<std::vector<cv::Point>> contornos;
+    cv::findContours(matrix, contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    // Criar uma máscara para manter apenas os contornos suficientemente circulares
+    cv::Mat img_filt = cv::Mat::zeros(matrix.size(), CV_8UC1);
+
+    // Definir a circularidade mínima
+    double circularidade_minima = 0.5; // Ajuste esse valor para o quão "redondo" deseja que seja
+
+    // Percorrer todos os contornos encontrados
+    for (size_t i = 0; i < contornos.size(); i++)
+    {
+        // Calcular a área e o perímetro (comprimento do contorno)
+        double area = cv::contourArea(contornos[i]);
+        double perimetro = cv::arcLength(contornos[i], true);
+
+        // Calcular a circularidade
+        double circularidade = 4 * CV_PI * area / (perimetro * perimetro);
+
+        // Manter contornos que são suficientemente circulares
+        if (circularidade > circularidade_minima)
+        {
+            cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
+        }
+    }
+    matrix = img_filt;
 }

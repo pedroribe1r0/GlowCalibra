@@ -26,7 +26,13 @@ int main()
     imagem.polarizeImage();
     imagem.saveImage();
 
+    imagem.getArea();
+    imagem.saveImage();
+
     imagem.circulize();
+    imagem.saveImage();
+
+    imagem.cleanNonCircularThings();
     imagem.saveImage();
 
     imagem.getArea();
