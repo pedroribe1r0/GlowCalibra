@@ -23,6 +23,10 @@ public:
     void equalizeImage();
     void polarizeImage();
     void cutSquareInMiddle();
+    void gaussianBlur();
+    void threshould();
+
+    void circulize();
 };
 int Image::counter = 0;
 
@@ -32,6 +36,29 @@ Image::Image(/* args */)
 
 Image::~Image()
 {
+}
+
+void Image::circulize()
+{
+    // Aplicar a operação de morfologia closing (dilatação seguida de erosão)
+    cv::Mat img_morph;
+    int morph_size = 5; // Tamanho do kernel para as operações morfológicas
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                cv::Size(2 * morph_size + 1, 2 * morph_size + 1),
+                                                cv::Point(morph_size, morph_size));
+
+    // Closing: dilatação seguida de erosão
+    cv::morphologyEx(matrix, img_morph, cv::MORPH_CLOSE, element);
+
+    // Aplicar preenchimento de buracos (Flood fill)
+    cv::Mat img_flood = img_morph.clone();
+    cv::floodFill(img_flood, cv::Point(0, 0), cv::Scalar(255)); // Preenche o fundo
+
+    // Inverter a imagem preenchida
+    cv::bitwise_not(img_flood, img_flood);
+
+    // Combinar a imagem original com a imagem preenchida
+    matrix = img_morph | img_flood;
 }
 
 void Image::loadImage(std::string path)
@@ -59,7 +86,7 @@ void Image::grayImage()
             int green = pixel[1];
             int blue = pixel[0];
 
-            int gray = (red + green + blue) / 3;
+            int gray = (blue + green + blue + green) / 4;
             matrix.at<cv::Vec3b>(i, j) = cv::Vec3b(gray, gray, gray);
         }
     }
@@ -68,7 +95,15 @@ void Image::grayImage()
 
 void Image::polarizeImage()
 {
-    cv::adaptiveThreshold(matrix, matrix, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, -4);
+    // cv::threshold(matrix, matrix, 235, 255, cv::THRESH_BINARY);
+    cv::Mat thresholded;
+    cv::adaptiveThreshold(matrix, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, -15);
+    matrix = thresholded;
+}
+
+void Image::threshould()
+{
+    cv::threshold(matrix, matrix, 45, 255, cv::THRESH_TOZERO);
 }
 void Image::getArea()
 {
@@ -117,12 +152,9 @@ void Image::getArea()
 
 void Image::equalizeImage()
 {
-    if (matrix.channels() == 3)
-    {
-        cv::cvtColor(matrix, matrix, cv::COLOR_BGR2GRAY);
-    }
-
-    cv::equalizeHist(matrix, matrix);
+    cv::Mat aux;
+    cv::bilateralFilter(matrix, aux, 21, 25, 50);
+    matrix = aux;
 }
 
 void Image::cutSquareInMiddle()
@@ -132,8 +164,30 @@ void Image::cutSquareInMiddle()
 
     int x = (cols) / 2;
     int y = (rows) / 2;
-    int width = 400;  // Largura do retângulo
-    int height = 400; // Altura do retângulo
+    int width = 600;  // Largura do retângulo
+    int height = 600; // Altura do retângulo
     cv::Rect roi(x, y, width, height);
     matrix = matrix(roi);
+}
+
+void Image::gaussianBlur()
+{
+    // Aplicar suavização Gaussiana com dois diferentes sigmas
+    cv::Mat gauss1, gauss2;
+    double sigma1 = 1.0; // Suavização leve
+    double sigma2 = 6.0; // Suavização mais forte
+
+    cv::GaussianBlur(matrix, gauss1, cv::Size(0, 0), sigma1); // Gaussiano mais suave
+    cv::GaussianBlur(matrix, gauss2, cv::Size(0, 0), sigma2); // Gaussiano mais forte
+
+    // Subtrair as duas imagens (Diferença de Gaussianas)
+    cv::subtract(gauss1, gauss2, matrix);
+
+    // Normalizar a imagem resultante para a faixa de 0 a 255
+    cv::normalize(matrix, matrix, 0, 255, cv::NORM_MINMAX);
+
+    // Aplicar um ajuste de contraste (opcional)
+    cv::Mat aux;
+    cv::convertScaleAbs(matrix, aux, 5.0, 0); // Aumentar contraste
+    matrix = aux;
 }

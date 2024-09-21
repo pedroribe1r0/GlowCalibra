@@ -9,11 +9,24 @@ int main()
     std::string path = "Database/SourceData/IMG_3536.jpg";
     imagem.loadImage(path);
     imagem.cutSquareInMiddle();
+    imagem.saveImage();
 
     imagem.grayImage();
     imagem.saveImage();
 
+    imagem.equalizeImage();
+    imagem.saveImage();
+
+    imagem.gaussianBlur();
+    imagem.saveImage();
+
+    imagem.threshould();
+    imagem.saveImage();
+
     imagem.polarizeImage();
+    imagem.saveImage();
+
+    imagem.circulize();
     imagem.saveImage();
 
     imagem.getArea();
