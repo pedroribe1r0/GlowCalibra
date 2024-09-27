@@ -27,6 +27,7 @@ public:
     void threshould();
     void cleanNonCircularThings();
     void circulize();
+    void calculateDistribution();
 };
 int Image::counter = 0;
 
@@ -129,6 +130,11 @@ void Image::getArea()
         }
     }
     matrix = img_filt;
+}
+void Image::calculateDistribution(){
+    std::vector<std::vector<cv::Point>> contornos;
+    cv::findContours(matrix, contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    for(size_t i = 0; i < contornos)
 }
 void Image::equalizeImage()
 {
