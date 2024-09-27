@@ -27,7 +27,8 @@ public:
     void threshould();
     void cleanNonCircularThings();
     void circulize();
-    void calculateDistribution();
+    float calculateDistribution();
+    std::vector<cv::Mat> splitIntoBlocks();
 };
 int Image::counter = 0;
 
@@ -131,10 +132,59 @@ void Image::getArea()
     }
     matrix = img_filt;
 }
-void Image::calculateDistribution(){
-    std::vector<std::vector<cv::Point>> contornos;
-    cv::findContours(matrix, contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    for(size_t i = 0; i < contornos)
+std::vector<cv::Mat> splitIntoBlocks(){
+    // Vetor para armazenar os blocos
+        std::vector<cv::Mat> blocks;
+
+        // Dimensões da matriz original
+        int rows = matrix.rows;
+        int cols = matrix.cols;
+
+        // Tamanho de cada bloco
+        int blockRows = rows / 3;
+        int blockCols = cols / 3;
+
+        // Loop para dividir a matriz em 9 blocos
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                // Definindo a região do bloco (ROI)
+                cv::Rect roi(j * blockCols, i * blockRows, blockCols, blockRows);
+
+                // Extraindo o bloco da matriz original
+                cv::Mat block = matrix(roi);
+
+                // Adicionando o bloco ao vetor
+                blocks.push_back(block);
+            }
+        }
+
+        return blocks;  // Retornando o vetor de blocos
+}
+float Image::calculateDistribution(){
+    double coveredArea = 0;
+    std::vector<cv::Mat> blocks = splitIntoBlocks();
+    std::vector<float> distributionBlocks;
+    for(int i = 0; i < 0; i++){
+        coveredArea = 0;
+        std::vector<std::vector<cv::Point>> contornos;
+        cv::findContours(blocks[i], contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        double totalArea = blocks[i].total();
+        for (size_t j = 0; j < contornos.size(); j++){
+            coveredArea += cv::contourArea(contornos[j]);
+        }
+        distributionBlocks.push_back(coveredArea/totalArea);
+    }
+    float distribution = 0;
+    float distributionMedia = 0;
+    for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 9; j++){
+            if(i != j){
+                distribution += fabs(distributionBlocks[i] - distributionBlocks[j]);
+            }
+        }
+        distributionMedia += distribution/8;
+    }
+    return distributionMedia / 9;
 }
 void Image::equalizeImage()
 {
