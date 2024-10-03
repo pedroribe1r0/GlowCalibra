@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
+
 #include "Tuple.hpp"
 #include "Buble.hpp"
 
@@ -28,6 +29,8 @@ public:
     void threshould();
     void cleanNonCircularThings(int size, float minimum);
     void circulize();
+    float calculateDistribution();
+    std::vector<cv::Mat> splitIntoBlocks();
 };
 int Image::counter = 0;
 
@@ -165,8 +168,8 @@ void Image::cutSquareInMiddle()
 
     int x = (cols) / 2;
     int y = (rows) / 2;
-    int width = 600;  // Largura do retângulo
-    int height = 600; // Altura do retângulo
+    int width = 800;  // Largura do retângulo
+    int height = 800; // Altura do retângulo
     cv::Rect roi(x, y, width, height);
     matrix = matrix(roi);
 }
@@ -229,4 +232,79 @@ void Image::cleanNonCircularThings(int size, float minumum)
         }
     }
     matrix = img_filt;
+}
+
+float Image::calculateDistribution()
+{
+    double coveredArea = 0;
+    std::vector<cv::Mat> blocks = splitIntoBlocks();
+    float MedDencidade = 0;
+    int i;
+    int numQuadrantes = blocks.size();
+
+    /*---------------------------------total Area---------------------------------*/
+
+    for (i = 0; i < numQuadrantes; i++)
+    {
+        coveredArea = 0;
+        std::vector<std::vector<cv::Point>> contornos;
+        cv::findContours(blocks[i], contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+        double totalArea = blocks[i].total();
+
+        for (size_t j = 0; j < contornos.size(); j++)
+        {
+            coveredArea += cv::contourArea(contornos[j]);
+        }
+        MedDencidade += (coveredArea / totalArea); // densidade de cobertura por area
+    }
+
+    MedDencidade /= i; // divide o total pelo numero de blocos, tendo a média da densidade por bloco
+    float desvPad = 0;
+
+    /*---------------------------------CALCULA DESVIO PADRAO---------------------------------*/
+    for (i = 0; i < numQuadrantes; i++)
+    {
+        coveredArea = 0;
+        std::vector<std::vector<cv::Point>> contornos;
+        cv::findContours(blocks[i], contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+        double totalArea = blocks[i].total();
+
+        for (size_t j = 0; j < contornos.size(); j++)
+        {
+            coveredArea += cv::contourArea(contornos[j]);
+        }
+        desvPad += pow(((coveredArea / totalArea) - MedDencidade), 2);
+    }
+    desvPad /= i;
+    desvPad = sqrt(desvPad);
+
+    return desvPad / MedDencidade;
+}
+
+std::vector<cv::Mat> Image::splitIntoBlocks()
+{
+    // Vetor para armazenar os blocos
+    std::vector<cv::Mat> blocks;
+    // Dimensões da matriz original
+    int rows = matrix.rows;
+    int cols = matrix.cols;
+    // Tamanho de cada bloco
+    int blockRows = rows / 3;
+    int blockCols = cols / 3;
+    // Loop para dividir a matriz em 9 blocos
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            // Definindo a região do bloco (ROI)
+            cv::Rect roi(j * blockCols, i * blockRows, blockCols, blockRows);
+            // Extraindo o bloco da matriz original
+            cv::Mat block = matrix(roi);
+            // Adicionando o bloco ao vetor
+            blocks.push_back(block);
+        }
+    }
+    return blocks; // Retornando o vetor de blocos
 }

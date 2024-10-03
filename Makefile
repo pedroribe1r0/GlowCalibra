@@ -1,7 +1,7 @@
 # Definições de variáveis
 CXX = g++
-CXXFLAGS = -std=c++17 -g -I/usr/include/opencv4  # Caminho para os cabeçalhos do OpenCV
-LDFLAGS = -L/usr/lib `pkg-config --libs opencv4`  # Caminho para as bibliotecas do OpenCV
+CXXFLAGS = -std=c++17 -g -I/usr/include/opencv4 -I/usr/include/ImageMagick-7 # Caminho para os cabeçalhos do OpenCV e ImageMagick
+LDFLAGS = -L/usr/lib `pkg-config --libs opencv4 Magick++`  # Caminho para as bibliotecas do OpenCV e ImageMagick
 SRC_DIR = src
 BIN_DIR = bin
 INCLUDE_DIR = include

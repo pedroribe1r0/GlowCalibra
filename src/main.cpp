@@ -29,7 +29,6 @@ int main()
         // Perform image processing steps
         imagem.loadImage(path);
         imagem.cutSquareInMiddle();
-        imagem.saveImage();
 
         imagem.grayImage();
         imagem.equalizeImage();
@@ -44,6 +43,9 @@ int main()
         imagem.cleanNonCircularThings(INT_MAX, CIRCULARITY_MIN);
         imagem.cleanNonCircularThings(BUBBLE_AREA_CUT, CIRCULARITY_MAX);
         imagem.getArea();
+
+        float HAHAHAHA = imagem.calculateDistribution();
+        cout << HAHAHAHA << endl;
 
         imagem.saveImage();
     }
