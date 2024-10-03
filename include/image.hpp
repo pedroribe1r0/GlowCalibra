@@ -12,6 +12,7 @@ private:
     static int counter;
     bool polarized;
     bool equalized;
+    bool saved;
 
 public:
     Image();
@@ -25,7 +26,7 @@ public:
     void cutSquareInMiddle();
     void gaussianBlur();
     void threshould();
-    void cleanNonCircularThings();
+    void cleanNonCircularThings(int size, float minimum);
     void circulize();
 };
 int Image::counter = 0;
@@ -97,7 +98,7 @@ void Image::polarizeImage()
 {
     // cv::threshold(matrix, matrix, 235, 255, cv::THRESH_BINARY);
     cv::Mat thresholded;
-    cv::adaptiveThreshold(matrix, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, -15);
+    cv::adaptiveThreshold(matrix, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, -16);
     matrix = thresholded;
 }
 
@@ -129,6 +130,26 @@ void Image::getArea()
         }
     }
     matrix = img_filt;
+
+    // Gerar arquivo txt com contagem e área das bolhas
+    std::string txtPath = "Database/RefinedData/imageInfo" + std::to_string(counter) + ".txt";
+    std::ofstream txtFile(txtPath);
+    if (txtFile.is_open())
+    {
+        std::vector<std::vector<cv::Point>> contours;
+        cv::findContours(matrix, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        txtFile << "Count: " << contours.size() << std::endl;
+        for (size_t i = 0; i < contours.size(); i++)
+        {
+            double area = cv::contourArea(contours[i]);
+            txtFile << "Bubble " << i + 1 << " - Area: " << area << std::endl;
+        }
+        txtFile.close();
+    }
+    else
+    {
+        std::cout << "Unable to open file" << std::endl;
+    }
 }
 void Image::equalizeImage()
 {
@@ -168,11 +189,11 @@ void Image::gaussianBlur()
 
     // Aplicar um ajuste de contraste (opcional)
     cv::Mat aux;
-    cv::convertScaleAbs(matrix, aux, 5.0, 0); // Aumentar contraste
+    cv::convertScaleAbs(matrix, aux, 4.0, 0); // Aumentar contraste
     matrix = aux;
 }
 
-void Image::cleanNonCircularThings()
+void Image::cleanNonCircularThings(int size, float minumum)
 {
     // Encontrar contornos
     std::vector<std::vector<cv::Point>> contornos;
@@ -182,7 +203,7 @@ void Image::cleanNonCircularThings()
     cv::Mat img_filt = cv::Mat::zeros(matrix.size(), CV_8UC1);
 
     // Definir a circularidade mínima
-    double circularidade_minima = 0.5; // Ajuste esse valor para o quão "redondo" deseja que seja
+    double circularidade_minima = minumum; // Ajuste esse valor para o quão "redondo" deseja que seja
 
     // Percorrer todos os contornos encontrados
     for (size_t i = 0; i < contornos.size(); i++)
@@ -191,11 +212,18 @@ void Image::cleanNonCircularThings()
         double area = cv::contourArea(contornos[i]);
         double perimetro = cv::arcLength(contornos[i], true);
 
-        // Calcular a circularidade
-        double circularidade = 4 * CV_PI * area / (perimetro * perimetro);
+        if (area < size)
+        {
+            // Calcular a circularidade
+            double circularidade = 4 * CV_PI * area / (perimetro * perimetro);
 
-        // Manter contornos que são suficientemente circulares
-        if (circularidade > circularidade_minima)
+            // Manter contornos que são suficientemente circulares
+            if (circularidade > circularidade_minima)
+            {
+                cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
+            }
+        }
+        else
         {
             cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
         }
