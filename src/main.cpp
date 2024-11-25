@@ -45,7 +45,7 @@ int main()
         imagem.getArea();
 
         float HAHAHAHA = imagem.calculateDistribution();
-        cout << HAHAHAHA << endl;
+        cout << HAHAHAHA << endl;   
 
         imagem.saveImage();
     }
