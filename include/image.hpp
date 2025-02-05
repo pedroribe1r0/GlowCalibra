@@ -1,6 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-
+#include <fstream>
 #include "Tuple.hpp"
 #include "Buble.hpp"
 
@@ -133,6 +133,7 @@ void Image::getArea()
         }
     }
     matrix = img_filt;
+
 
     // Gerar arquivo txt com contagem e área das bolhas
     std::string txtPath = "Database/RefinedData/imageInfo" + std::to_string(counter) + ".txt";
