@@ -10,6 +10,7 @@ class Image
 {
 private:
     cv::Mat matrix;
+    float scale;
     static int counter;
     bool polarized;
     bool equalized;
@@ -18,6 +19,7 @@ private:
 public:
     Image();
     ~Image();
+    void findScale(float diameter, std::string unity);
     void loadImage(std::string path);
     void saveImage();
     void grayImage();
@@ -40,6 +42,23 @@ Image::Image(/* args */)
 
 Image::~Image()
 {
+}
+
+void Image::findScale(float diameter, std::string unity){
+    int large = matrix.size().width;
+    if(unity == "um"){
+        diameter /= 1000;
+    }
+    else if(unity == "mm"){
+        diameter /= 10;
+    }
+    else if(unity == "dm"){
+        diameter *= 10;
+    }
+    else if(unity == "m"){
+        diameter *= 100;
+    }
+    scale = diameter/large;
 }
 
 void Image::circulize()
