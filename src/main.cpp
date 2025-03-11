@@ -20,7 +20,7 @@ int main()
         
         // Perform image processing steps
         imagem.loadImage(path);
-        //findScale(106, "mm")
+        imagem.findScale(106);
         imagem.cutSquareInMiddle();
         imagem.saveImage();
 

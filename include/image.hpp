@@ -19,7 +19,7 @@ private:
 public:
     Image();
     ~Image();
-    void findScale(float diameter, std::string unity);
+    void findScale(float diameter);
     void loadImage(std::string path);
     void saveImage();
     void grayImage();
@@ -44,20 +44,9 @@ Image::~Image()
 {
 }
 
-void Image::findScale(float diameter, std::string unity){
+void Image::findScale(float diameter){
     int large = matrix.size().width;
-    if(unity == "um"){
-        diameter /= 1000;
-    }
-    else if(unity == "mm"){
-        diameter /= 10;
-    }
-    else if(unity == "dm"){
-        diameter *= 10;
-    }
-    else if(unity == "m"){
-        diameter *= 100;
-    }
+    std::cout << large << endl;
     scale = diameter/large;
 }
 
@@ -165,7 +154,7 @@ void Image::getArea()
         for (size_t i = 0; i < contours.size(); i++)
         {
             double area = cv::contourArea(contours[i]);
-            txtFile << "Bubble " << i + 1 << " - Area: " << area << std::endl;
+            txtFile << "Bubble " << i + 1 << " - Area: " << area * scale * scale << std::endl;
         }
         txtFile.close();
     }
