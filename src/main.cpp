@@ -2,14 +2,26 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <filesystem>
-#include "./image.hpp"
+#include "./imagem.hpp"
 #define CIRCULARITY_MIN 0.4f
 #define CIRCULARITY_MAX 0.6f
 #define BUBBLE_AREA_CUT 40
 
 int main()
 {
-    Image imagem;
+    Imagem img;
+    cv::Mat matrix = img.load_image("Database/SourceData/IMG_3525.jpg");
+    img.crop_square(matrix);
+    img.color_treatment(matrix);
+    img.saveImage(matrix);
+    img.gray_scale(matrix);
+    img.aply_threshold(matrix);
+    img.saveImage(matrix);
+
+    return 0;
+}
+
+/*    Image imagem;
 
     std::string directoryPath = "Database/SourceData";
 
@@ -22,30 +34,28 @@ int main()
         imagem.loadImage(path);
         imagem.findScale(106);
         imagem.cutSquareInMiddle();
-        imagem.saveImage();
+        //imagem.saveImage();
 
         imagem.grayImage();
         imagem.equalizeImage();
-        imagem.saveImage();
+        //imagem.saveImage();
 
         imagem.gaussianBlur();
-        imagem.saveImage();
+        //imagem.saveImage();
 
         imagem.threshould();
         imagem.polarizeImage();
-        imagem.saveImage();
+        //imagem.saveImage();
 
         imagem.getArea();
+        imagem.saveImage();
         imagem.circulize();
         imagem.cleanNonCircularThings(INT_MAX, CIRCULARITY_MIN);
-        imagem.saveImage();
+        //imagem.saveImage();
         
 
         float distribuction = imagem.calculateDistribution();
         cout << distribuction << endl;
 
-        imagem.saveImage();
-    }
-
-    return 0;
-}
+        //imagem.saveImage();
+    }*/

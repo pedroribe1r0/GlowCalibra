@@ -2,8 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "Tuple.hpp"
-#include "Buble.hpp"
-
 using namespace Tuples;
 
 class Image
