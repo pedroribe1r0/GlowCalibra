@@ -73,3 +73,62 @@ void Imagem::aply_threshold(cv::Mat &image){
     /*cv::adaptiveThreshold(image, image, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
         cv::THRESH_BINARY, 11, 2); */
 }
+
+cv::Mat Imagem::cleanNonCircularThings(int size, float minumum, cv::Mat img)
+{
+    // Encontrar contornos
+    std::vector<std::vector<cv::Point>> contornos;
+    cv::findContours(img, contornos, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    // Criar uma máscara para manter apenas os contornos suficientemente circulares
+    cv::Mat img_filt = cv::Mat::zeros(img.size(), CV_8UC1);
+
+    // Definir a circularidade mínima
+    double circularidade_minima = minumum; // Ajuste esse valor para o quão "redondo" deseja que seja
+
+    // Percorrer todos os contornos encontrados
+    for (size_t i = 0; i < contornos.size(); i++)
+    {
+        // Calcular a área e o perímetro (comprimento do contorno)
+        double area = cv::contourArea(contornos[i]);
+        double perimetro = cv::arcLength(contornos[i], true);
+
+        if (area < size)
+        {
+            // Calcular a circularidade
+            double circularidade = 4 * CV_PI * area / (perimetro * perimetro);
+
+            // Manter contornos que são suficientemente circulares
+            if (circularidade > circularidade_minima)
+            {
+                cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
+            }
+        }
+        else
+        {
+            cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
+        }
+    }
+    return img_filt;
+}
+
+cv::Mat Imagem::removeDropsBySize(double minArea, cv::Size matrixSize, bool lower, std::vector<std::vector<cv::Point>> contours){
+    cv::Mat img_filt = cv::Mat::zeros(matrixSize, CV_8UC1);
+
+    for (size_t i = 0; i < contours.size(); i++)
+    {
+        // Calcular a área e o perímetro (comprimento do contorno)
+        double area = cv::contourArea(contours[i]);
+
+        if(lower){
+            if(area < minArea)
+                cv::drawContours(img_filt, contours, (int)i, cv::Scalar(255), cv::FILLED);
+        }
+        else{
+            if(area > minArea)
+                cv::drawContours(img_filt, contours, (int)i, cv::Scalar(255), cv::FILLED);
+        }        
+    }
+
+    return img_filt;
+}

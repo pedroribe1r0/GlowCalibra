@@ -22,5 +22,7 @@ public:
     void color_treatment(cv::Mat &image);
     void gray_scale(cv::Mat &image);
     void aply_threshold(cv::Mat &image);
-    
+    cv::Mat cleanNonCircularThings(int size, float minumum, cv::Mat img);
+    cv::Mat removeDropsBySize(double minArea, cv::Size matrixSize, bool lower, std::vector<std::vector<cv::Point>> contours);
 };
+

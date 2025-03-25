@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "Tuple.hpp"
+
 using namespace Tuples;
 
 class Image
@@ -10,10 +11,6 @@ private:
     cv::Mat matrix;
     float scale;
     static int counter;
-    bool polarized;
-    bool equalized;
-    bool saved;
-
 public:
     Image();
     ~Image();
