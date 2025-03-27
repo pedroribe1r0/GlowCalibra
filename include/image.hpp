@@ -33,6 +33,8 @@ public:
     void circulize();
     float calculateDistribution();
     std::vector<cv::Mat> splitIntoBlocks();
+
+    std::vector<double> contourToArea(const std::vector<std::vector<cv::Point>>& contornos);
 };
 int Image::counter = 0;
 
@@ -316,4 +318,14 @@ std::vector<cv::Mat> Image::splitIntoBlocks()
         }
     }
     return blocks; // Retornando o vetor de blocos
+}
+
+std::vector<double> Image::contourToArea(const std::vector<std::vector<cv::Point>>& contours)
+{
+    std::vector<double> areas;
+    for (const auto& contour : contours) {
+        double area = cv::contourArea(contour) * (scale * scale); // Convert to real-world unit
+        areas.push_back(area);
+    }
+    return areas;
 }
