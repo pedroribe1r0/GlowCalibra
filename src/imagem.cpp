@@ -18,9 +18,21 @@ cv::Mat Imagem::load_image(const string path){
     return image;
 }
 
+cv::Mat Imagem::apply_convolution(const cv::Mat& img, const cv::Mat& kernel) {
+    cv::Mat output;
+    // Aplica a convolução utilizando o kernel fornecido
+    cv::filter2D(img, output, -1, kernel, cv::Point(-1, -1), 0, cv::BORDER_REPLICATE);
+    return output;
+}
+
 void Imagem::saveImage(cv::Mat image)
 {
     std::string path = "Database/RefinedData/refinedImage" + std::to_string(counter++) + ".jpeg";
+    cv::imwrite(path, image);
+}
+void Imagem::saveImage(cv::Mat image, const std::string name)
+{
+    std::string path = "Database/RefinedData/" + name + ".jpeg";
     cv::imwrite(path, image);
 }
 
