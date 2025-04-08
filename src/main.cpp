@@ -12,10 +12,64 @@
 int main() {   
     Imagem cursor;
 
-    cv::Mat img = cv::imread("Database/SourceData/teste PDI.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat img = cursor.load_image("Database/SourceData/IMG_3529.jpg");
     cursor.saveImage(img);
-    Kernel filtro;
-    cv::Mat kernel;
+    cursor.crop_square(img);
+    cursor.color_treatment(img);
+    cursor.gray_scale(img);
+
+    cv::Mat gradiente_x, gradiente_y, sobel, prewitt, roberts, laplaciano;
+
+    //Sobel
+    cv::Sobel(img, gradiente_x, CV_64F, 1, 0, 3);
+    cv::Sobel(img, gradiente_y, CV_64F, 0, 1, 3);
+    cv::magnitude(gradiente_x, gradiente_y, sobel);
+    cv::normalize(sobel, sobel, 0, 255, cv::NORM_MINMAX, CV_8U);
+    cursor.aply_threshold(sobel);
+    cursor.saveImage(sobel, "sobel");
+
+    // prewitt
+    cv::Mat kernel_prewitt_x = (cv::Mat_<float>(3, 3) <<
+        -1, 0, 1,
+        -1, 0, 1,
+        -1, 0, 1);
+    cv::Mat kernel_prewitt_y = (cv::Mat_<float>(3, 3) <<
+        -1, -1, -1,
+         0,  0,  0,
+         1,  1,  1);
+    cv::filter2D(img, gradiente_x, CV_32F, kernel_prewitt_x);
+    cv::filter2D(img, gradiente_y, CV_32F, kernel_prewitt_y);
+    cv::magnitude(gradiente_x, gradiente_y, prewitt);
+    cv::normalize(prewitt, prewitt, 0, 255, cv::NORM_MINMAX, CV_8U);
+    cursor.aply_threshold(prewitt);
+    cursor.saveImage(prewitt, "prewitt");
+
+    //roberts
+    cv::Mat kernel_roberts_x = (cv::Mat_<float>(2, 2) <<
+        1,  0,
+        0, -1);
+    cv::Mat kernel_roberts_y = (cv::Mat_<float>(2, 2) <<
+        0,  1,
+        -1,  0);
+
+    cv::filter2D(img, gradiente_x, CV_32F, kernel_roberts_x);
+    cv::filter2D(img, gradiente_y, CV_32F, kernel_roberts_y);
+    cv::magnitude(gradiente_x, gradiente_y, roberts);
+
+    cv::normalize(roberts, roberts, 0, 255, cv::NORM_MINMAX, CV_8U);
+    cursor.aply_threshold(roberts);
+
+    cursor.saveImage(roberts, "roberts");
+
+    //laplaciano
+
+    cv::Laplacian(img, laplaciano, CV_64F);
+    cv::convertScaleAbs(laplaciano, laplaciano);
+    cursor.aply_threshold(laplaciano);
+
+    cursor.saveImage(laplaciano, "laplaciano");
+
+
 
     return 0;
 }
