@@ -10,12 +10,13 @@
 int main()
 {
     Imagem img;
-    cv::Mat matrix = img.load_image("Database/SourceData/IMG_3525.jpg");
+    cv::Mat matrix = img.load_image("Database/SourceData/IMG_new.jpeg");
     img.crop_square(matrix);
     img.color_treatment(matrix);
     img.saveImage(matrix);
     img.gray_scale(matrix);
     img.aply_threshold(matrix);
+    img.cleanNonCircularThings(INT_MAX, CIRCULARITY_MIN, matrix);
     img.saveImage(matrix);
 
     return 0;

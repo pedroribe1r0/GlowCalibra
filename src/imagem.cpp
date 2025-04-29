@@ -74,7 +74,7 @@ void Imagem::aply_threshold(cv::Mat &image){
         cv::THRESH_BINARY, 11, 2); */
 }
 
-cv::Mat Imagem::cleanNonCircularThings(int size, float minumum, cv::Mat img)
+void Imagem::cleanNonCircularThings(int size, float minumum, cv::Mat &img)
 {
     // Encontrar contornos
     std::vector<std::vector<cv::Point>> contornos;
@@ -109,11 +109,11 @@ cv::Mat Imagem::cleanNonCircularThings(int size, float minumum, cv::Mat img)
             cv::drawContours(img_filt, contornos, (int)i, cv::Scalar(255), cv::FILLED);
         }
     }
-    return img_filt;
+    img = img_filt;
 }
 
-cv::Mat Imagem::removeDropsBySize(double minArea, cv::Size matrixSize, bool lower, std::vector<std::vector<cv::Point>> contours){
-    cv::Mat img_filt = cv::Mat::zeros(matrixSize, CV_8UC1);
+void Imagem::removeDropsBySize(double limit, cv::Mat& matrix, bool lower, std::vector<std::vector<cv::Point>> contours){
+    cv::Mat img_filt = cv::Mat::zeros(matrix.size(), CV_8UC1);
 
     for (size_t i = 0; i < contours.size(); i++)
     {
@@ -121,14 +121,14 @@ cv::Mat Imagem::removeDropsBySize(double minArea, cv::Size matrixSize, bool lowe
         double area = cv::contourArea(contours[i]);
 
         if(lower){
-            if(area < minArea)
+            if(area < limit)
                 cv::drawContours(img_filt, contours, (int)i, cv::Scalar(255), cv::FILLED);
         }
         else{
-            if(area > minArea)
+            if(area > limit)
                 cv::drawContours(img_filt, contours, (int)i, cv::Scalar(255), cv::FILLED);
         }        
     }
 
-    return img_filt;
+    matrix = img_filt;
 }
