@@ -2,7 +2,6 @@
 #include <iostream>
 #include <filesystem>
 #include "./imagem.hpp"
-#include "./kernel.hpp"
 #include <cmath>
 #include <numeric>
 #include <fstream>
@@ -200,7 +199,7 @@ int main()
 
     cv::Point2f center;
     float radius = 0;
-        imagem.gaussianBlur();
+    imagem.gaussianBlur();
     encontrarCentro(filtered, center, radius, 10.0f);
     cv::Mat circMask = cv::Mat::zeros(matrix.size(), CV_8U);
     std::cout << radius << "raio" << std::endl;
